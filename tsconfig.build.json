@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "exclude": ["**/*.test.ts", "node_modules", "src/test/**", ".history/**"],
+    "compilerOptions": {
+        "declaration": true,
+        "noEmit": false,
+        "module": "commonjs",
+        "outDir": "lib/cjs"
+    }
+}
