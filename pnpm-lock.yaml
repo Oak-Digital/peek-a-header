@@ -10,9 +10,13 @@ specifiers:
   eslint-plugin-vitest: ^0.0.30
   prettier: ^2.8.8
   rimraf: ^5.0.0
+  tseep: ^1.0.5
   typescript: ^4.9.5
   vite: ^4.3.5
   vitest: ^0.28.5
+
+dependencies:
+  tseep: 1.0.5_typescript@4.9.5
 
 devDependencies:
   '@typescript-eslint/eslint-plugin': 5.59.5_jdo46vuzdvtqioigt7za7mzwma
@@ -342,6 +346,10 @@ packages:
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
+
+  /@types/node/12.20.55:
+    resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
+    dev: false
 
   /@types/node/20.1.2:
     resolution: {integrity: sha512-CTO/wa8x+rZU626cL2BlbCDzydgnFNgc19h4YvizpTO88MFQxab8wqisxaofQJ/9bLGugRdWIuX/TbIs6VVF6g==}
@@ -2109,6 +2117,14 @@ packages:
       is-number: 7.0.0
     dev: true
 
+  /tsargs/1.4.1_typescript@4.9.5:
+    resolution: {integrity: sha512-YaqVGNOcYoo1yF/nA7EQf68h+P4AsfixYe6n9C3zbYF7iJqKPd19HMykALwA81jQjhRPq/iIfuu43Gupi9/mOA==}
+    peerDependencies:
+      typescript: ^3.1.6
+    dependencies:
+      typescript: 4.9.5
+    dev: false
+
   /tsconfig-paths/3.14.2:
     resolution: {integrity: sha512-o/9iXgCYc5L/JxCHPe3Hvh8Q/2xm5Z+p18PESBU6Ff33695QnCHBEjcytY2q19ua7Mbl/DavtBOLq+oG0RCL+g==}
     dependencies:
@@ -2117,6 +2133,15 @@ packages:
       minimist: 1.2.8
       strip-bom: 3.0.0
     dev: true
+
+  /tseep/1.0.5_typescript@4.9.5:
+    resolution: {integrity: sha512-afUfGjFR0bmrkgPElfYguWryhqhsAXF7bNU4UQk9eZPeSN/FOrwfMyYMtDw1d+rnUzRsSiJgFNFJJKFhYYTBKw==}
+    dependencies:
+      '@types/node': 12.20.55
+      tsargs: 1.4.1_typescript@4.9.5
+    transitivePeerDependencies:
+      - typescript
+    dev: false
 
   /tslib/1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
@@ -2161,7 +2186,6 @@ packages:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /ufo/1.1.2:
     resolution: {integrity: sha512-TrY6DsjTQQgyS3E3dBaOXf0TpPD8u9FVrVYmKVegJuFw51n/YB9XPt+U6ydzFG5ZIN7+DIjPbNmXoBj9esYhgQ==}
