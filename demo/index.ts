@@ -35,4 +35,11 @@ window.addEventListener('DOMContentLoaded', () => {
             instances.forEach((instance) => instance.snap());
         });
     }
+
+    const partialHideButton = document.getElementById('partial-hide-button');
+    if (partialHideButton) {
+        partialHideButton.addEventListener('click', () => {
+            instances.forEach((instance) => instance.partialHide());
+        });
+    }
 });

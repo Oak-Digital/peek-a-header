@@ -22,6 +22,7 @@ class PeekAHeader {
     private previousScrollY;
     private eventEmitter: EventEmitter<EventMap>;
     private onScrollFunction: () => void;
+    private sticky: null | boolean = null;
 
     constructor(element: HTMLElement) {
         this.previousScrollY = window.scrollY;
@@ -53,6 +54,19 @@ class PeekAHeader {
 
     private emit<K extends keyof EventMap>(event: K, ...args: Parameters<EventMap[K]>) {
         this.eventEmitter.emit(event, ...args);
+    }
+
+    /**
+     * Checks if the element is sticky or not
+     */
+    isSticky(useCachedValue = true) {
+        if (useCachedValue && this.sticky !== null) {
+            return this.sticky;
+        }
+        const style = window.getComputedStyle(this.element);
+        const isSticky = style.position === 'sticky';
+        this.sticky = isSticky;
+        return isSticky;
     }
 
     /**
@@ -108,18 +122,64 @@ class PeekAHeader {
         //this.locked = false;
     }
 
+    /**
+     * Show the full header
+     */
     show() {
         this.hidden = false;
         this.currentTranslateY = null;
         this.applyTransform();
     }
 
+    /**
+     * Hide the header
+     */
     hide() {
         this.hidden = true;
         this.currentTranslateY = null;
         this.applyTransform();
     }
 
+    /**
+     * This function should only be used with sticky headers. It works like hide() for non-sticky headers.
+     * It will check if the header has space enough to be hidden, else it will only partially hide.
+     * It uses getStaticOffset() which uses the DOM, so it might be a little expensive.
+     */
+    partialHide() {
+        if (!this.isSticky()) {
+            this.hide();
+            return;
+        }
+        const translateYNumber = this.getTranslateYNumber();
+        const offset = this.element.offsetTop + translateYNumber;
+        const staticOffset = this.getStaticOffset();
+        const offsetFromStaticPosition = offset - staticOffset;
+        const spaceRequired = this.headerHeight + translateYNumber;
+
+        if (offsetFromStaticPosition >= spaceRequired) {
+            this.hide();
+            return;
+        }
+
+        this.currentTranslateY = -offsetFromStaticPosition + translateYNumber;
+        this.hidden = false;
+        this.applyTransform();
+    }
+
+    /**
+     * This function will get the original offset of the header element.
+     * It writes and reads from the DOM, so it might be a little expensive.
+     */
+    getStaticOffset() {
+        this.element.style.position = 'relative';
+        const offset = this.element.offsetTop;
+        this.element.style.position = '';
+        return offset;
+    }
+
+    /**
+     * Snap the header to the closest position (shown or hidden)
+     */
     snap() {
         if (this.currentTranslateY === null) return; // already snapped
 
