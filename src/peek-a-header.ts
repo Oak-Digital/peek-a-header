@@ -1,17 +1,15 @@
 import { EventEmitter } from 'tseep';
 
 type EventMap = {
-    updateTranslate: (translateY: number) => void;
     progress: (progress: {
         /**
          * The percentage of the header that is hidden.
          */
         progress: number;
         /**
-         * The amount of pixels that are hidden. Or percentage if the unit is %.
+         * The amount of pixels that are hidden.
          */
         amount: number;
-        unit: 'px' | '%';
     }) => void;
 };
 
@@ -20,6 +18,14 @@ enum ScrollDirection {
     down,
     none,
 }
+
+type PeekAHeaderOptions = {
+    /**
+     * Whether or not the PeekAHeader should apply the transforms
+     * If you want to hande this yourself, set this to false. and listen to the progress event.
+     */
+    autoUpdateTransform?: boolean;
+};
 
 class PeekAHeader {
     private element: HTMLElement;
@@ -34,13 +40,15 @@ class PeekAHeader {
     private eventEmitter: EventEmitter<EventMap>;
     private onScrollFunction: () => void;
     private sticky: null | boolean = null;
+    private autoUpdateTransform: boolean;
 
-    constructor(element: HTMLElement) {
+    constructor(element: HTMLElement, { autoUpdateTransform = true }: PeekAHeaderOptions = {}) {
         this.previousScrollY = window.scrollY;
         this.element = element;
         const rect = element.getBoundingClientRect();
         this.homeY = this.calculateHomeY(rect);
         this.headerHeight = rect.height;
+        this.autoUpdateTransform = autoUpdateTransform;
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -90,14 +98,27 @@ class PeekAHeader {
         if (this.currentTranslateY === null) {
             if (this.hidden) {
                 num = `-100%`;
-                this.emit('updateTranslate', -this.headerHeight);
+                this.emit('progress', {
+                    progress: 1,
+                    amount: -this.headerHeight,
+                });
             } else {
                 num = '0px';
-                this.emit('updateTranslate', 0);
+                this.emit('progress', {
+                    progress: 0,
+                    amount: 0,
+                });
             }
         } else {
             num = `${this.currentTranslateY}px`;
-            this.emit('updateTranslate', this.currentTranslateY);
+            this.emit('progress', {
+                progress: this.currentTranslateY,
+                amount: this.currentTranslateY,
+            });
+        }
+
+        if (!this.autoUpdateTransform) {
+            return;
         }
 
         this.element.style.transform = `translateY(${num})`;
