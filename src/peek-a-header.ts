@@ -2,6 +2,17 @@ import { EventEmitter } from 'tseep';
 
 type EventMap = {
     updateTranslate: (translateY: number) => void;
+    progress: (progress: {
+        /**
+         * The percentage of the header that is hidden.
+         */
+        progress: number;
+        /**
+         * The amount of pixels that are hidden. Or percentage if the unit is %.
+         */
+        amount: number;
+        unit: 'px' | '%';
+    }) => void;
 };
 
 enum ScrollDirection {
@@ -193,7 +204,6 @@ class PeekAHeader {
         this.applyTransform();
     }
 
-
     /**
      * Destroy the PeekAHeader instance, removing all event listeners.
      * Calling any methods on PeekAHeader after this method is called will result in undefined behavior.
@@ -248,8 +258,7 @@ class PeekAHeader {
         this.updateHomeY();
         if (scrollDelta === 0) return;
 
-        const scrollDirection =
-            scrollDelta < 0 ? ScrollDirection.up : ScrollDirection.down;
+        const scrollDirection = scrollDelta < 0 ? ScrollDirection.up : ScrollDirection.down;
 
         /* console.log('scrollY', scrollDirection, scrollDelta); */
 
