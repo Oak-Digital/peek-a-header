@@ -14,7 +14,7 @@
         "dev": "vite",
         "preview": "vite preview",
         "demo:build": "vite build",
-        "demo:build:gh-pages": "vite build --base=/$(node -p \"require('./package.json').name.split('/').pop()\")/",
+        "demo:build:gh-pages": "BASE=$(node -p \"require('./package.json').name.split('/').pop()\") vite build --base=/$BASE/",
         "build": "rimraf lib && pnpm build:cjs && pnpm build:esm",
         "build:cjs": "tsc -p tsconfig.build.json",
         "build:esm": "tsc -p tsconfig.build.esm.json",
