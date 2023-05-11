@@ -108,6 +108,32 @@ class PeekAHeader {
         //this.locked = false;
     }
 
+    show() {
+        this.hidden = false;
+        this.currentTranslateY = null;
+        this.applyTransform();
+    }
+
+    hide() {
+        this.hidden = true;
+        this.currentTranslateY = null;
+        this.applyTransform();
+    }
+
+    snap() {
+        if (this.currentTranslateY === null) return; // already snapped
+
+        if (this.currentTranslateY > -this.headerHeight / 2) {
+            this.hidden = false;
+        } else {
+            this.hidden = true;
+        }
+
+        this.currentTranslateY = null;
+        this.applyTransform();
+    }
+
+
     /**
      * Destroy the PeekAHeader instance, removing all event listeners.
      * Calling any methods on PeekAHeader after this method is called will result in undefined behavior.

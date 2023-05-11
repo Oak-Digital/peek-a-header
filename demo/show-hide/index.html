@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../style.css" />
+    <title>Peek A Header</title>
+</head>
+
+<body>
+    <div id="app" class="page page-height page-bg">
+        <div class="pre-header" style="padding: 20px; background: grey;">
+            Here is a pre header - try scrolling down slowly and see that the header behaves like it is sticky until you scroll past this.
+        </div>
+        <div class="pre-header" style="padding: 20px; background: grey;">
+            Here is a pre header - try scrolling down slowly and see that the header behaves like it is sticky until you scroll past this.
+        </div>
+        <header id="peek-a-header-sticky" class="peek-a-header-sticky w-1/2">
+            👻 Peek A Header - sticky
+        </header>
+        <header id="peek-a-header-fixed" class="peek-a-header-fixed left-1/2">
+            👻 Peek A Header - fixed
+        </header>
+        <div style="margin-top: 500px">
+            <button id="hide-button">
+                Hide
+            </button>
+            <button id="show-button">
+                Show
+            </button>
+            <button id="snap-button">
+                Snap
+            </button>
+        </div>
+    </div>
+    <script type="module" src="../index.ts"></script>
+</body>
+
+</html>
