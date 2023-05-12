@@ -47,7 +47,7 @@ type PeekAHeaderOptions = {
     /**
      * Whether or not you want PeekAHeader to automatically handle snapping while scrolling.
      */
-    //autoSnap?: boolean;
+    autoSnap?: boolean;
     /**
      * automatically handle setting aria-hidden
      */
@@ -70,10 +70,16 @@ class PeekAHeader {
     private autoUpdateTransform: boolean;
     private transitionStrategy: TransitionStrategy | null = null;
     private autoAriaHidden: boolean = true;
+    private autoSnap: boolean = false;
 
     constructor(
         element: HTMLElement,
-        { autoUpdateTransform = true, transitionStrategy, autoAriaHidden = true }: PeekAHeaderOptions = {}
+        {
+            autoUpdateTransform = true,
+            transitionStrategy,
+            autoAriaHidden = true,
+        }: // autoSnap = false,
+        PeekAHeaderOptions = {}
     ) {
         this.previousScrollY = window.scrollY;
         this.element = element;
@@ -83,6 +89,7 @@ class PeekAHeader {
         this.autoUpdateTransform = autoUpdateTransform;
         this.transitionStrategy = transitionStrategy ?? null;
         this.autoAriaHidden = autoAriaHidden;
+        /* this.autoSnap = autoSnap; */
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -104,6 +111,10 @@ class PeekAHeader {
                 this.element.setAttribute('aria-hidden', 'false');
             });
         }
+
+        //if (this.autoSnap) {
+        //    // when scrolling using 'wheel' use partialHide and show
+        //}
     }
 
     on<K extends keyof EventMap>(event: K, listener: EventMap[K]) {
