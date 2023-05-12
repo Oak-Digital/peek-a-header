@@ -110,6 +110,16 @@ destroy should be called when you no longer need the header. Maybe you are switc
 
 Calling any functions after this function is called will result in undefined behavior and most likely memory leaking.
 
+#### `lock(position: 'hidden' | 'shown' | 'current')`
+
+May currently not work well with sticky headers if there is anything before the flow of it.
+
+Locks the header in place, either `'hidden'`, `'shown'` or `'current'`.
+
+#### `unlock()`
+
+Unlocks the header if it was locked.
+
 #### `on()`, `off()`
 
 see Events

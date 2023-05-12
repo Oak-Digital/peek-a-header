@@ -60,4 +60,32 @@ window.addEventListener('DOMContentLoaded', () => {
             instances.forEach((instance) => instance.partialHide());
         });
     }
+
+    const lockHideButton = document.getElementById('lock-hidden-button');
+    if (lockHideButton) {
+        lockHideButton.addEventListener('click', () => {
+            instances.forEach((instance) => instance.lock('hidden'));
+        });
+    }
+
+    const lockShowButton = document.getElementById('lock-shown-button');
+    if (lockShowButton) {
+        lockShowButton.addEventListener('click', () => {
+            instances.forEach((instance) => instance.lock('shown'));
+        });
+    }
+
+    const lockCurrentButton = document.getElementById('lock-current-button');
+    if (lockCurrentButton) {
+        lockCurrentButton.addEventListener('click', () => {
+            instances.forEach((instance) => instance.lock('current'));
+        });
+    }
+
+    const unlockButton = document.getElementById('unlock-button');
+    if (unlockButton) {
+        unlockButton.addEventListener('click', () => {
+            instances.forEach((instance) => instance.unlock());
+        });
+    }
 });

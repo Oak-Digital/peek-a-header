@@ -61,7 +61,7 @@ class PeekAHeader {
     private homeY: number;
     private headerHeight: number;
     private hidden = false;
-    //private locked = false; // TODO
+    private locked: null | 'hidden' | 'shown' | number = null;
     private currentTranslateY: number | null = null;
     private resizeObserver: ResizeObserver;
     private previousScrollY;
@@ -191,33 +191,41 @@ class PeekAHeader {
     }
 
     /**
+     * @alpha May not always work as intended with sticky headers
      * Lock the header at the current position or as hidden or shown
      *
      * @param position the position to lock the header at
      */
-    lock(position: 'hidden' | 'shown' | 'current' = 'current') {
-        throw new Error('lock() is not implemented');
-        //this.locked = true;
-        //switch (position) {
-        //    case 'hidden':
-        //        this.hidden = true;
-        //        return;
-        //    case 'shown':
-        //        this.hidden = false;
-        //        return;
-        //    case 'current':
-        //        return;
-        //    default:
-        //        throw new Error(`Unknown lock position ${position}`);
-        //}
+    lock(position: 'hidden' | 'shown' | 'current' = 'hidden') {
+        switch (position) {
+            case 'hidden':
+                this.locked = position;
+                this.partialHide();
+                break;
+            case 'shown':
+                this.locked = position;
+                this.show();
+                break;
+            case 'current':
+                this.locked = this.getTranslateYNumber();
+                break;
+            default:
+                throw new Error(`Unknown lock position ${position}`);
+        }
     }
 
     /**
      * Unlock the header
      */
     unlock() {
-        throw new Error('unlock() is not implemented');
-        //this.locked = false;
+        this.locked = null;
+    }
+
+    /**
+     * Returns true if the header is locked
+     */
+    isLocked() {
+        return this.locked !== null;
     }
 
     private transitonShow(forceFallback = false) {
@@ -435,13 +443,13 @@ class PeekAHeader {
         const scrollDelta = scrollY < this.homeY ? realScrollDelta - (this.homeY - scrollY) : realScrollDelta;
         this.previousScrollY = scrollY;
 
-        this.updateHomeY();
         if (scrollDelta === 0) return;
 
         const scrollDirection = scrollDelta < 0 ? ScrollDirection.up : ScrollDirection.down;
 
         /* console.log('scrollY', scrollDirection, scrollDelta); */
 
+        this.updateHomeY();
         switch (scrollDirection) {
             case ScrollDirection.up:
                 if (!this.hidden && this.currentTranslateY === null) {
@@ -457,6 +465,16 @@ class PeekAHeader {
 
             /* case ScrollDirection.none: */
             /*     return; */
+        }
+
+        if (this.isLocked()) {
+            if (!this.isSticky()) {
+                return;
+            }
+
+            // TODO:
+
+            return;
         }
 
         const currrentTranslateYNumber = this.getTranslateYNumber();
