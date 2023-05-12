@@ -1,4 +1,5 @@
 import { EventEmitter } from 'tseep';
+import { TransitionStrategy, TransitionStrategyReturn } from './transitions/strategy';
 
 type EventMap = {
     progress: (progress: {
@@ -11,6 +12,8 @@ type EventMap = {
          */
         amount: number;
     }) => void;
+    transitionStart: () => void;
+    transitionEnd: () => void;
 };
 
 enum ScrollDirection {
@@ -19,12 +22,24 @@ enum ScrollDirection {
     none,
 }
 
+const fallbackTransition: TransitionStrategyReturn = {
+    promise: Promise.resolve(),
+};
+
 type PeekAHeaderOptions = {
     /**
      * Whether or not the PeekAHeader should apply the transforms
      * If you want to hande this yourself, set this to false. and listen to the progress event.
      */
     autoUpdateTransform?: boolean;
+    /**
+     * The transition strategy to use when the header is hidden or shown.
+     */
+    transitionStrategy?: TransitionStrategy;
+    /**
+     * Whether or not you want PeekAHeader to automatically handle snapping while scrolling.
+     */
+    //autoSnap?: boolean;
 };
 
 class PeekAHeader {
@@ -41,14 +56,16 @@ class PeekAHeader {
     private onScrollFunction: () => void;
     private sticky: null | boolean = null;
     private autoUpdateTransform: boolean;
+    private transitionStrategy: TransitionStrategy | null = null;
 
-    constructor(element: HTMLElement, { autoUpdateTransform = true }: PeekAHeaderOptions = {}) {
+    constructor(element: HTMLElement, { autoUpdateTransform = true, transitionStrategy }: PeekAHeaderOptions = {}) {
         this.previousScrollY = window.scrollY;
         this.element = element;
         const rect = element.getBoundingClientRect();
         this.homeY = this.calculateHomeY(rect);
         this.headerHeight = rect.height;
         this.autoUpdateTransform = autoUpdateTransform;
+        this.transitionStrategy = transitionStrategy ?? null;
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -90,7 +107,6 @@ class PeekAHeader {
 
     /**
      * Apply the transform to the header
-     *
      */
     applyTransform() {
         let num;
@@ -154,22 +170,95 @@ class PeekAHeader {
         //this.locked = false;
     }
 
+    private transitonShow(forceFallback = false) {
+        if (forceFallback) {
+            return fallbackTransition;
+        }
+
+        const transition = this.transitionStrategy?.show(this.element, {
+            from: {
+                y: this.getTranslateYNumber(),
+            },
+            to: {
+                y: 0,
+            },
+        });
+
+        if (transition) {
+            this.emit('transitionStart');
+            transition.promise.then(() => {
+                this.emit('transitionEnd');
+            });
+        }
+
+        return transition ?? fallbackTransition;
+    }
+
+    private transitionHide(forceFallback = false, to: number | string = '-100%') {
+        if (forceFallback) {
+            return fallbackTransition;
+        }
+
+        return (
+            this.transitionStrategy?.hide(this.element, {
+                from: {
+                    y: this.getTranslateYNumber(),
+                },
+                to: {
+                    y: to,
+                },
+            }) ?? fallbackTransition
+        );
+    }
+
     /**
      * Show the full header
      */
-    show() {
+    async show(useTransition: boolean = true) {
+        if (this.getTranslateYNumber() === 0) {
+            return;
+        }
+
+        const transition = this.transitonShow(!useTransition);
+        const { applyTransform = 'after', promise } = transition;
+
         this.hidden = false;
         this.currentTranslateY = null;
-        this.applyTransform();
+
+        if (applyTransform === 'before') {
+            this.applyTransform();
+        }
+
+        await promise;
+
+        if (applyTransform === 'after') {
+            this.applyTransform();
+        }
     }
 
     /**
      * Hide the header
      */
-    hide() {
+    async hide(useTransition: boolean = true) {
+        if (this.hidden) {
+            return;
+        }
+
+        const transition = this.transitionHide(!useTransition);
+        const { applyTransform = 'after', promise } = transition;
+
         this.hidden = true;
         this.currentTranslateY = null;
-        this.applyTransform();
+
+        if (applyTransform === 'before') {
+            this.applyTransform();
+        }
+
+        await promise;
+
+        if (applyTransform === 'after') {
+            this.applyTransform();
+        }
     }
 
     /**
@@ -177,7 +266,7 @@ class PeekAHeader {
      * It will check if the header has space enough to be hidden, else it will only partially hide.
      * It uses getStaticOffset() which uses the DOM, so it might be a little expensive.
      */
-    partialHide() {
+    async partialHide(useTransition: boolean = true) {
         if (!this.isSticky()) {
             this.hide();
             return;
@@ -189,13 +278,29 @@ class PeekAHeader {
         const spaceRequired = this.headerHeight + translateYNumber;
 
         if (offsetFromStaticPosition >= spaceRequired) {
-            this.hide();
+            await this.hide();
             return;
         }
 
-        this.currentTranslateY = -offsetFromStaticPosition + translateYNumber;
-        this.hidden = false;
-        this.applyTransform();
+        const newTranslateY = this.capTranslateY(translateYNumber - Math.min(offsetFromStaticPosition, spaceRequired));
+
+        if (translateYNumber === newTranslateY) {
+            return;
+        }
+
+        this.currentTranslateY = newTranslateY;
+        const transition = this.transitionHide(!useTransition, newTranslateY);
+        const { applyTransform = 'after', promise } = transition;
+
+        if (applyTransform === 'before') {
+            this.applyTransform();
+        }
+
+        await promise;
+
+        if (applyTransform === 'after') {
+            this.applyTransform();
+        }
     }
 
     /**
@@ -212,17 +317,14 @@ class PeekAHeader {
     /**
      * Snap the header to the closest position (shown or hidden)
      */
-    snap() {
+    async snap() {
         if (this.currentTranslateY === null) return; // already snapped
 
         if (this.currentTranslateY > -this.headerHeight / 2) {
-            this.hidden = false;
+            await this.show();
         } else {
-            this.hidden = true;
+            await this.partialHide();
         }
-
-        this.currentTranslateY = null;
-        this.applyTransform();
     }
 
     /**

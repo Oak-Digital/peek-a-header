@@ -1,17 +1,26 @@
 import PeekAHeader from '../src/peek-a-header';
+import { TransitionClassStrategy } from '../src/transitions/class';
 
 window.addEventListener('DOMContentLoaded', () => {
     const instances: PeekAHeader[] = [];
+    const strategy = new TransitionClassStrategy({
+        showClass: 'transition-transforms',
+        hideClass: 'transition-transforms',
+    });
 
     const header = document.getElementById('peek-a-header-sticky')!;
     if (header) {
-        const stickyInstance = new PeekAHeader(header);
+        const stickyInstance = new PeekAHeader(header, {
+            transitionStrategy: strategy,
+        });
         instances.push(stickyInstance);
     }
 
     const fixedHeader = document.getElementById('peek-a-header-fixed');
     if (fixedHeader) {
-        const fixedInstance = new PeekAHeader(fixedHeader);
+        const fixedInstance = new PeekAHeader(fixedHeader, {
+            transitionStrategy: strategy,
+        });
         instances.push(fixedInstance);
     }
 

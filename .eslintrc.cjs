@@ -23,6 +23,7 @@ module.exports = {
         eqeqeq: ['error', 'always'],
         'default-case-last': ['error'],
         'no-lonely-if': ['error'],
+        '@typescript-eslint/no-inferrable-types': 'off',
         '@typescript-eslint/no-magic-numbers': [
             'off',
             {
