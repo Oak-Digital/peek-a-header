@@ -2,7 +2,7 @@ import { EventEmitter } from 'tseep';
 import { TransitionStrategy, TransitionStrategyReturn } from './transitions/strategy';
 import { Gesture } from '@use-gesture/vanilla';
 
-type EventMap = {
+export type PeekAHeaderEventMap = {
     progress: (progress: {
         /**
          * The percentage of the header that is hidden.
@@ -24,6 +24,7 @@ type EventMap = {
      */
     unhidden: () => void;
 };
+type EventMap = PeekAHeaderEventMap;
 
 enum ScrollDirection {
     up,
@@ -35,7 +36,7 @@ const fallbackTransition: TransitionStrategyReturn = {
     promise: Promise.resolve(),
 };
 
-type PeekAHeaderOptions = {
+export type PeekAHeaderOptions = {
     /**
      * Whether or not the PeekAHeader should apply the transforms
      * If you want to hande this yourself, set this to false. and listen to the progress event.
@@ -55,7 +56,7 @@ type PeekAHeaderOptions = {
     autoAriaHidden?: boolean;
 };
 
-class PeekAHeader {
+export class PeekAHeader {
     private element: HTMLElement;
     // The home is where the header is currently "sticking" to.
     private homeY: number;
