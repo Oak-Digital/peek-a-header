@@ -448,7 +448,11 @@ class PeekAHeader {
             this.emit('hidden');
         } else {
             this.currentTranslateY = newTranslateY;
-            this.hidden = false;
+
+            if (this.hidden) {
+                this.hidden = false;
+                this.emit('unhidden');
+            }
         }
 
         this.applyTransform();
