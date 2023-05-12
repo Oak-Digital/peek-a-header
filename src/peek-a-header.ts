@@ -14,6 +14,14 @@ type EventMap = {
     }) => void;
     transitionStart: () => void;
     transitionEnd: () => void;
+    /**
+     * Emitted when the header is completely hidden
+     */
+    hidden: () => void;
+    /**
+     * Emitted when the header is no longer completely hidden
+     */
+    unhidden: () => void;
 };
 
 enum ScrollDirection {
@@ -40,6 +48,10 @@ type PeekAHeaderOptions = {
      * Whether or not you want PeekAHeader to automatically handle snapping while scrolling.
      */
     //autoSnap?: boolean;
+    /**
+     * automatically handle setting aria-hidden
+     */
+    autoAriaHidden?: boolean;
 };
 
 class PeekAHeader {
@@ -57,8 +69,12 @@ class PeekAHeader {
     private sticky: null | boolean = null;
     private autoUpdateTransform: boolean;
     private transitionStrategy: TransitionStrategy | null = null;
+    private autoAriaHidden: boolean = true;
 
-    constructor(element: HTMLElement, { autoUpdateTransform = true, transitionStrategy }: PeekAHeaderOptions = {}) {
+    constructor(
+        element: HTMLElement,
+        { autoUpdateTransform = true, transitionStrategy, autoAriaHidden = true }: PeekAHeaderOptions = {}
+    ) {
         this.previousScrollY = window.scrollY;
         this.element = element;
         const rect = element.getBoundingClientRect();
@@ -66,6 +82,7 @@ class PeekAHeader {
         this.headerHeight = rect.height;
         this.autoUpdateTransform = autoUpdateTransform;
         this.transitionStrategy = transitionStrategy ?? null;
+        this.autoAriaHidden = autoAriaHidden;
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -78,6 +95,15 @@ class PeekAHeader {
 
         this.onScrollFunction = this.onScroll.bind(this);
         window.addEventListener('scroll', this.onScrollFunction);
+
+        if (this.autoAriaHidden) {
+            this.on('hidden', () => {
+                this.element.setAttribute('aria-hidden', 'true');
+            });
+            this.on('unhidden', () => {
+                this.element.setAttribute('aria-hidden', 'false');
+            });
+        }
     }
 
     on<K extends keyof EventMap>(event: K, listener: EventMap[K]) {
@@ -227,12 +253,17 @@ class PeekAHeader {
 
         if (applyTransform === 'before') {
             this.applyTransform();
+            this.emit('unhidden');
         }
 
         await promise;
 
         if (applyTransform === 'after') {
             this.applyTransform();
+        }
+
+        if (applyTransform !== 'before') {
+            this.emit('unhidden');
         }
     }
 
@@ -259,6 +290,8 @@ class PeekAHeader {
         if (applyTransform === 'after') {
             this.applyTransform();
         }
+
+        this.emit('hidden');
     }
 
     /**
@@ -408,9 +441,11 @@ class PeekAHeader {
         if (newTranslateY === 0) {
             this.currentTranslateY = null;
             this.hidden = false;
+            this.emit('unhidden');
         } else if (newTranslateY === -this.headerHeight) {
             this.currentTranslateY = null;
             this.hidden = true;
+            this.emit('hidden');
         } else {
             this.currentTranslateY = newTranslateY;
             this.hidden = false;
