@@ -1,5 +1,6 @@
 import { EventEmitter } from 'tseep';
 import { TransitionStrategy, TransitionStrategyReturn } from './transitions/strategy';
+import { Gesture } from '@use-gesture/vanilla';
 
 type EventMap = {
     progress: (progress: {
@@ -65,12 +66,12 @@ class PeekAHeader {
     private resizeObserver: ResizeObserver;
     private previousScrollY;
     private eventEmitter: EventEmitter<EventMap>;
-    private onScrollFunction: () => void;
     private sticky: null | boolean = null;
     private autoUpdateTransform: boolean;
     private transitionStrategy: TransitionStrategy | null = null;
     private autoAriaHidden: boolean = true;
     private autoSnap: boolean = false;
+    private gesture: Gesture;
 
     constructor(
         element: HTMLElement,
@@ -78,7 +79,8 @@ class PeekAHeader {
             autoUpdateTransform = true,
             transitionStrategy,
             autoAriaHidden = true,
-        }: // autoSnap = false,
+            autoSnap = false,
+        }:
         PeekAHeaderOptions = {}
     ) {
         this.previousScrollY = window.scrollY;
@@ -89,7 +91,15 @@ class PeekAHeader {
         this.autoUpdateTransform = autoUpdateTransform;
         this.transitionStrategy = transitionStrategy ?? null;
         this.autoAriaHidden = autoAriaHidden;
-        /* this.autoSnap = autoSnap; */
+        this.autoSnap = autoSnap;
+        this.gesture = new Gesture(window, {
+            onScrollEnd: () => {
+                this.onScrollEnd();
+            },
+            onScroll: () => {
+                this.onScroll();
+            },
+        });
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -99,9 +109,6 @@ class PeekAHeader {
         this.resizeObserver.observe(element);
 
         this.eventEmitter = new EventEmitter<EventMap>();
-
-        this.onScrollFunction = this.onScroll.bind(this);
-        window.addEventListener('scroll', this.onScrollFunction);
 
         if (this.autoAriaHidden) {
             this.on('hidden', () => {
@@ -127,6 +134,12 @@ class PeekAHeader {
 
     private emit<K extends keyof EventMap>(event: K, ...args: Parameters<EventMap[K]>) {
         this.eventEmitter.emit(event, ...args);
+    }
+
+    private onScrollEnd() {
+        if (this.autoSnap) {
+            this.snap();
+        }
     }
 
     /**
@@ -378,7 +391,7 @@ class PeekAHeader {
     destroy() {
         this.resizeObserver.disconnect();
         this.eventEmitter.removeAllListeners();
-        window.removeEventListener('scroll', this.onScrollFunction);
+        this.gesture.destroy();
     }
 
     private calculateHomeY(rect?: DOMRect) {

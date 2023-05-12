@@ -42,9 +42,11 @@ const options = {
     // transitionStrategy: See Transitions
     autoUpdateTransform: true,
     autoAriaHidden: true,
+    autoSnap: true,
 };
 const peekAHeader = new PeekAHeader(element, options);
 ```
+
 
 ### Transitions
 
@@ -69,6 +71,70 @@ const peekAHeader = new PeekAHeader(element, {
 In this example we use the built-in `TransitionClassStrategy` which sets a class when transitioning, you will have to define the classes yourself.
 
 You can also define the transitions yourself by making a class that implements `TransitionStrategy`. For example if you want to use your some animation library like `framer-motion` or `popmotion`.
+
+### Options
+
+#### `autoUpdateTransform (default: true)`
+
+`autoUpdateTransform` will make `PeekAHeader` automatically update the transform on the element.
+In some cases you may want to control this yourself if you are also applying other transforms, then this should be set to false.
+
+#### `autoAriaHidden (default: true)`
+
+`autoAriaHidden` will automatically update `aria-hidden` on your header. In some cases you might want to set this to false, if there are other factors that may make the header hidden.
+
+#### `autoSnap (default: false)`
+
+`autoSnap` makes the header snap into place once scroll ends.
+
+### Methods
+
+#### `show()`
+
+Makes the header fully visible
+
+#### `partialHide()`
+
+Hides the header as much as possible, if the header is fixed, it will be completely hidden.
+
+#### `hide()`
+
+You should probably use `partialHide()`
+Makes the header completely hidden.
+
+NOTE: if used on a sticky header it may go further up than it's static position. For sticky headers you may use `partialHide()`
+
+#### `destroy()`
+
+destroy should be called when you no longer need the header. Maybe you are switching page to a page that does not use the same header, then you should call this function.
+
+Calling any functions after this function is called will result in undefined behavior and most likely memory leaking.
+
+#### `on()`, `off()`
+
+see Events
+
+### Events
+
+#### `progress`
+
+```typescript
+(progress: { progress: number, amount: number })
+```
+
+progress is the percentage of the header that is hidden and amount is the amount of pixels of the header that is hidden.
+
+#### `transitionStart` and `transitionEnd`
+
+These events are emitted when a transiton is started and ended.
+
+#### `hidden`
+
+Emitted when the header is completely hidden.
+
+#### `unhidden`
+
+Emitted when the header is no longer completely hidden, and partially visible.
 
 ## Development
 

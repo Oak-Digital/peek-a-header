@@ -10,6 +10,7 @@ export default defineConfig({
                 demo: resolve(__dirname, 'demo', 'index.html'),
                 'sticky-extra': resolve(__dirname, 'demo', 'sticky-extra', 'index.html'),
                 'show-hide': resolve(__dirname, 'demo', 'show-hide', 'index.html'),
+                'auto-snap': resolve(__dirname, 'demo', 'auto-snap', 'index.html'),
             },
         },
     },

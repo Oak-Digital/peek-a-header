@@ -24,6 +24,15 @@ window.addEventListener('DOMContentLoaded', () => {
         instances.push(fixedInstance);
     }
 
+    const stickyAutoSnapHeader = document.getElementById('peek-a-header-sticky-auto-snap');
+    if (stickyAutoSnapHeader) {
+        const stickyAutoSnapInstance = new PeekAHeader(stickyAutoSnapHeader, {
+            transitionStrategy: strategy,
+            autoSnap: true,
+        });
+        instances.push(stickyAutoSnapInstance);
+    }
+
     const hideButton = document.getElementById('hide-button');
     if (hideButton) {
         hideButton.addEventListener('click', () => {

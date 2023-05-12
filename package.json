@@ -38,6 +38,7 @@
         "vitest": "^0.28.5"
     },
     "dependencies": {
+        "@use-gesture/vanilla": "^10.2.26",
         "tseep": "^1.0.5"
     }
 }
