@@ -6,9 +6,9 @@
     "files": [
         "lib"
     ],
-    "main": "./lib/cjs/main.js",
-    "module": "./lib/esm/main.js",
-    "types": "./lib/esm/main.d.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/esm/index.js",
+    "types": "./lib/esm/index.d.ts",
     "scripts": {
         "dev": "vite",
         "preview": "vite preview",
