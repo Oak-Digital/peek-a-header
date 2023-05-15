@@ -71,6 +71,7 @@ export class PeekAHeader {
     private transitionStrategy: TransitionStrategy | null = null;
     private autoAriaHidden: boolean = true;
     private autoSnap: boolean = false;
+    private cachedStaticOffset: number | null = null;
 
     private onScrollFunction = () => {
         this.onScroll();
@@ -370,14 +371,22 @@ export class PeekAHeader {
         }
     }
 
+    invalidateStaticOffset() {
+        this.cachedStaticOffset = null;
+    }
+
     /**
      * This function will get the original offset of the header element.
      * It writes and reads from the DOM, so it might be a little expensive.
      */
-    getStaticOffset() {
+    getStaticOffset(useCache = true) {
+        if (useCache && this.cachedStaticOffset !== null) {
+            return this.cachedStaticOffset;
+        }
         this.element.style.position = 'relative';
         const offset = this.element.offsetTop;
         this.element.style.position = '';
+        this.cachedStaticOffset = offset;
         return offset;
     }
 
