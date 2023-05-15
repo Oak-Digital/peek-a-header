@@ -122,9 +122,12 @@ export class PeekAHeader {
             });
         }
 
-        //if (this.autoSnap) {
-        //    // when scrolling using 'wheel' use partialHide and show
-        //}
+        if (this.isSticky()) {
+            if (rect.y > 0) {
+                // cache the offset now
+                this.getStaticOffset();
+            }
+        }
     }
 
     on<K extends keyof EventMap>(event: K, listener: EventMap[K]) {
@@ -143,6 +146,10 @@ export class PeekAHeader {
         if (this.autoSnap) {
             this.snap();
         }
+    }
+
+    invalidateSticky() {
+        this.sticky = null;
     }
 
     /**
@@ -326,6 +333,11 @@ export class PeekAHeader {
             this.applyTransform();
         }
 
+        if (this.cachedStaticOffset === null) {
+            // cache the static offset while hidden
+            this.getStaticOffset();
+        }
+
         this.emit('hidden');
     }
 
@@ -500,6 +512,10 @@ export class PeekAHeader {
             this.currentTranslateY = null;
             this.hidden = true;
             this.emit('hidden');
+            if (this.cachedStaticOffset === null) {
+                // cache the static offset while hidden.
+                this.getStaticOffset();
+            }
         } else {
             this.currentTranslateY = newTranslateY;
 
