@@ -87,6 +87,11 @@ In some cases you may want to control this yourself if you are also applying oth
 
 `autoSnap` makes the header snap into place once scroll ends.
 
+#### `isTop (default: false)`
+
+`isTop` is only relevant if the header is sticky.
+If the header is at the very top of the page with no content behind it, it is recommended to set this prop to true.
+
 ### Methods
 
 #### `show()`

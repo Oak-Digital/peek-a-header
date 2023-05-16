@@ -53,6 +53,15 @@ export type PeekAHeaderOptions = {
      * automatically handle setting aria-hidden
      */
     autoAriaHidden?: boolean;
+    /**
+     * Whether or not the header is at the top of the page
+     * This is only relevant when the header is sticky
+     */
+    isTop?: boolean;
+    /**
+     * Whether or not the static offset should be cached when found.
+     */
+    cacheStaticOffset?: boolean;
 };
 
 export class PeekAHeader {
@@ -72,6 +81,8 @@ export class PeekAHeader {
     private autoAriaHidden: boolean = true;
     private autoSnap: boolean = false;
     private cachedStaticOffset: number | null = null;
+    private isTop: boolean;
+    private shouldCacheStaticOffset: boolean;
 
     private onScrollFunction = () => {
         this.onScroll();
@@ -88,6 +99,8 @@ export class PeekAHeader {
             transitionStrategy,
             autoAriaHidden = true,
             autoSnap = false,
+            isTop = false,
+            cacheStaticOffset = true,
         }:
         PeekAHeaderOptions = {}
     ) {
@@ -100,6 +113,8 @@ export class PeekAHeader {
         this.transitionStrategy = transitionStrategy ?? null;
         this.autoAriaHidden = autoAriaHidden;
         this.autoSnap = autoSnap;
+        this.isTop = isTop;
+        this.shouldCacheStaticOffset = cacheStaticOffset;
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -122,11 +137,9 @@ export class PeekAHeader {
             });
         }
 
-        if (this.isSticky()) {
-            if (rect.y > 0) {
-                // cache the offset now
-                this.getStaticOffset();
-            }
+        if (rect.y > 0 || window.scrollY <= 0) {
+            // cache the offset now
+            this.cacheStaticOffset();
         }
     }
 
@@ -136,6 +149,22 @@ export class PeekAHeader {
 
     off<K extends keyof EventMap>(event: K, listener: EventMap[K]) {
         this.eventEmitter.off(event, listener);
+    }
+
+    private cacheStaticOffset() {
+        if (!this.isSticky()) {
+            return;
+        }
+
+        if (!this.shouldCacheStaticOffset) {
+            return;
+        }
+
+        if (this.cachedStaticOffset !== null) {
+            return;
+        }
+
+        this.cachedStaticOffset = this.getStaticOffset();
     }
 
     private emit<K extends keyof EventMap>(event: K, ...args: Parameters<EventMap[K]>) {
@@ -150,6 +179,7 @@ export class PeekAHeader {
 
     invalidateSticky() {
         this.sticky = null;
+        this.isSticky();
     }
 
     /**
@@ -333,11 +363,7 @@ export class PeekAHeader {
             this.applyTransform();
         }
 
-        if (this.cachedStaticOffset === null) {
-            // cache the static offset while hidden
-            this.getStaticOffset();
-        }
-
+        this.cacheStaticOffset();
         this.emit('hidden');
     }
 
@@ -385,6 +411,9 @@ export class PeekAHeader {
 
     invalidateStaticOffset() {
         this.cachedStaticOffset = null;
+        if (this.hidden || window.scrollY === 0 || this.element.getBoundingClientRect().y > 0) {
+            this.cacheStaticOffset();
+        }
     }
 
     /**
@@ -392,6 +421,9 @@ export class PeekAHeader {
      * It writes and reads from the DOM, so it might be a little expensive.
      */
     getStaticOffset(useCache = true) {
+        if (this.isTop) {
+            return 0;
+        }
         if (useCache && this.cachedStaticOffset !== null) {
             return this.cachedStaticOffset;
         }
@@ -511,11 +543,8 @@ export class PeekAHeader {
         } else if (newTranslateY === -this.headerHeight) {
             this.currentTranslateY = null;
             this.hidden = true;
+            this.cacheStaticOffset();
             this.emit('hidden');
-            if (this.cachedStaticOffset === null) {
-                // cache the static offset while hidden.
-                this.getStaticOffset();
-            }
         } else {
             this.currentTranslateY = newTranslateY;
 
