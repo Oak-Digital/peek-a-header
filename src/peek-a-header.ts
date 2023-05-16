@@ -476,6 +476,7 @@ export class PeekAHeader {
         this.eventEmitter.removeAllListeners();
         window.removeEventListener('scroll', this.onScrollFunction);
         window.removeEventListener('scrollend', this.onScrollEndFunction);
+        window.removeEventListener('wheel', this.onWheelFunction);
     }
 
     private calculateHomeY(rect?: DOMRect) {
