@@ -52,3 +52,7 @@ header {
     transition-duration: 0.25s;
     transition-timing-function: ease-in-out;
 }
+
+.large-padding {
+    padding: 6rem 1.25rem;
+}

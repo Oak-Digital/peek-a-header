@@ -143,9 +143,7 @@ export class PeekAHeader {
 
         window.addEventListener('scroll', this.onScrollFunction);
         window.addEventListener('scrollend', this.onScrollEndFunction);
-        window.addEventListener('wheel', (e) => {
-            console.log('wheel', e);
-        });
+        window.addEventListener('wheel', this.onWheelFunction);
 
         this.eventEmitter = new EventEmitter<EventMap>();
 
@@ -512,6 +510,29 @@ export class PeekAHeader {
         return currrentTranslateYNumber;
     }
 
+    private handleWheelSnap(direction: ScrollDirection) {
+        if (!this.snapOnWheel) {
+            return;
+        }
+
+        if (direction === ScrollDirection.none) {
+            return;
+        }
+
+        if (direction === ScrollDirection.up) {
+            this.show();
+            return;
+        }
+
+        // is down
+        if (this.snapOnWheel === 'full') {
+            this.hide();
+            return;
+        }
+
+        this.partialHide();
+    }
+
     private onWheel() {
         const wasWheel = this.currentScroll?.isWheel ?? false;
         if (this.currentScroll) {
@@ -525,13 +546,7 @@ export class PeekAHeader {
             };
         }
 
-        if (this.snapOnWheel) {
-            if (this.currentScroll.direction === ScrollDirection.up) {
-                this.show();
-            } else if (this.currentScroll.direction === ScrollDirection.down) {
-                this.partialHide();
-            }
-        }
+        this.handleWheelSnap(this.currentScroll.direction);
     }
 
     private onScroll() {
@@ -560,12 +575,8 @@ export class PeekAHeader {
         if (directionChanged) {
             this.currentScroll.direction = scrollDirection;
 
-            if (this.snapOnWheel && this.currentScroll.isWheel) {
-                if (scrollDirection === ScrollDirection.up) {
-                    this.show();
-                } else {
-                    this.partialHide();
-                }
+            if (this.currentScroll.isWheel) {
+                this.handleWheelSnap(scrollDirection);
             }
         }
 

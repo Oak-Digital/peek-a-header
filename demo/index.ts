@@ -33,6 +33,17 @@ window.addEventListener('DOMContentLoaded', () => {
         instances.push(stickyAutoSnapInstance);
     }
 
+    const wheelSnapHeader = document.getElementById('peek-a-header-wheel-snap');
+    if (wheelSnapHeader) {
+        const wheelSnapInstance = new PeekAHeader(wheelSnapHeader, {
+            transitionStrategy: strategy,
+            snapOnWheel: 'full',
+            isTop: true,
+        });
+        instances.push(wheelSnapInstance);
+        console.log(wheelSnapInstance);
+    }
+
     const hideButton = document.getElementById('hide-button');
     if (hideButton) {
         hideButton.addEventListener('click', () => {
