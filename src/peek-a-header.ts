@@ -512,7 +512,7 @@ export class PeekAHeader {
     }
 
     private handleWheelSnap(direction: ScrollDirection) {
-        if (!this.snapOnWheel) {
+        if (!this.snapOnWheel || this.locked) {
             return;
         }
 
