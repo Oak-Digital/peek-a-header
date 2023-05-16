@@ -62,7 +62,17 @@ export type PeekAHeaderOptions = {
      * Whether or not the static offset should be cached when found.
      */
     cacheStaticOffset?: boolean;
+    /**
+     * Whether or not the header should snap to the wheel when scrolling.
+     */
+    snapOnWheel?: 'full' | 'partial' | null;
 };
+
+type Scroll = {
+    isWheel: boolean;
+    direction: ScrollDirection;
+    hasScrolled: boolean;
+}
 
 export class PeekAHeader {
     private element: HTMLElement;
@@ -83,6 +93,8 @@ export class PeekAHeader {
     private cachedStaticOffset: number | null = null;
     private isTop: boolean;
     private shouldCacheStaticOffset: boolean;
+    private currentScroll: Scroll | null = null;
+    private snapOnWheel: PeekAHeaderOptions['snapOnWheel'] | null;
 
     private onScrollFunction = () => {
         this.onScroll();
@@ -90,6 +102,10 @@ export class PeekAHeader {
 
     private onScrollEndFunction = () => {
         this.onScrollEnd();
+    };
+
+    private onWheelFunction = (e: WheelEvent) => {
+        this.onWheel();
     };
 
     constructor(
@@ -101,6 +117,7 @@ export class PeekAHeader {
             autoSnap = false,
             isTop = false,
             cacheStaticOffset = true,
+            snapOnWheel = null,
         }:
         PeekAHeaderOptions = {}
     ) {
@@ -115,6 +132,7 @@ export class PeekAHeader {
         this.autoSnap = autoSnap;
         this.isTop = isTop;
         this.shouldCacheStaticOffset = cacheStaticOffset;
+        this.snapOnWheel = snapOnWheel;
 
         this.resizeObserver = new ResizeObserver(() => {
             this.updateHomeY();
@@ -125,6 +143,9 @@ export class PeekAHeader {
 
         window.addEventListener('scroll', this.onScrollFunction);
         window.addEventListener('scrollend', this.onScrollEndFunction);
+        window.addEventListener('wheel', (e) => {
+            console.log('wheel', e);
+        });
 
         this.eventEmitter = new EventEmitter<EventMap>();
 
@@ -175,6 +196,7 @@ export class PeekAHeader {
         if (this.autoSnap) {
             this.snap();
         }
+        this.currentScroll = null;
     }
 
     invalidateSticky() {
@@ -454,8 +476,8 @@ export class PeekAHeader {
     destroy() {
         this.resizeObserver.disconnect();
         this.eventEmitter.removeAllListeners();
-        window.removeEventListener('scroll', this.onScroll);
-        window.removeEventListener('scrollend', this.onScrollEnd);
+        window.removeEventListener('scroll', this.onScrollFunction);
+        window.removeEventListener('scrollend', this.onScrollEndFunction);
     }
 
     private calculateHomeY(rect?: DOMRect) {
@@ -490,6 +512,28 @@ export class PeekAHeader {
         return currrentTranslateYNumber;
     }
 
+    private onWheel() {
+        const wasWheel = this.currentScroll?.isWheel ?? false;
+        if (this.currentScroll) {
+            this.currentScroll.isWheel = true;
+            this.currentScroll.hasScrolled = true;
+        } else {
+            this.currentScroll = {
+                isWheel: true,
+                direction: ScrollDirection.none,
+                hasScrolled: true,
+            };
+        }
+
+        if (this.snapOnWheel) {
+            if (this.currentScroll.direction === ScrollDirection.up) {
+                this.show();
+            } else if (this.currentScroll.direction === ScrollDirection.down) {
+                this.partialHide();
+            }
+        }
+    }
+
     private onScroll() {
         const scrollY = window.scrollY;
         const realScrollDelta = scrollY - this.previousScrollY;
@@ -502,6 +546,28 @@ export class PeekAHeader {
         if (scrollDelta === 0) return;
 
         const scrollDirection = scrollDelta < 0 ? ScrollDirection.up : ScrollDirection.down;
+
+        const directionChanged = !this.currentScroll || this.currentScroll.direction !== scrollDirection;
+
+        if (!this.currentScroll) {
+            this.currentScroll = {
+                isWheel: false,
+                direction: scrollDirection,
+                hasScrolled: true,
+            };
+        }
+
+        if (directionChanged) {
+            this.currentScroll.direction = scrollDirection;
+
+            if (this.snapOnWheel && this.currentScroll.isWheel) {
+                if (scrollDirection === ScrollDirection.up) {
+                    this.show();
+                } else {
+                    this.partialHide();
+                }
+            }
+        }
 
         /* console.log('scrollY', scrollDirection, scrollDelta); */
 
