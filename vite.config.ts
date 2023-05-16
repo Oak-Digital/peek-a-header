@@ -12,6 +12,7 @@ export default defineConfig({
                 'show-hide': resolve(__dirname, 'demo', 'show-hide', 'index.html'),
                 'auto-snap': resolve(__dirname, 'demo', 'auto-snap', 'index.html'),
                 'locking': resolve(__dirname, 'demo', 'locking', 'index.html'),
+                'snap-wheel': resolve(__dirname, 'demo', 'snap-wheel', 'index.html'),
             },
         },
     },
