@@ -92,6 +92,10 @@ In some cases you may want to control this yourself if you are also applying oth
 `isTop` is only relevant if the header is sticky.
 If the header is at the very top of the page with no content behind it, it is recommended to set this prop to true.
 
+#### `snapOnWheel: 'full' | 'partial' | null (default: null)`
+
+If you want the header to snap to the direction you scrolled immedietly, you can set this prop to either `'full'` or `'partial'`.
+
 ### Methods
 
 #### `show()`
