@@ -151,6 +151,10 @@ Emitted when the header is completely hidden.
 
 Emitted when the header is no longer completely hidden, and partially visible.
 
+## Usage in frameworks
+
+* react: see [`@oak-digital/react-peek-a-header`](https://github.com/Oak-Digital/react-peek-a-header)
+
 ## Development
 
 TODO:
