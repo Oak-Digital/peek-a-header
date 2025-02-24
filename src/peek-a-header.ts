@@ -119,7 +119,7 @@ export class PeekAHeader {
             cacheStaticOffset = true,
             snapOnWheel = null,
         }:
-        PeekAHeaderOptions = {}
+            PeekAHeaderOptions = {}
     ) {
         this.previousScrollY = window.scrollY;
         this.element = element;
@@ -506,8 +506,8 @@ export class PeekAHeader {
         const currrentTranslateYNumber = this.currentTranslateY
             ? this.currentTranslateY
             : this.hidden
-            ? -this.headerHeight
-            : 0;
+                ? -this.headerHeight
+                : 0;
         return currrentTranslateYNumber;
     }
 
@@ -551,7 +551,9 @@ export class PeekAHeader {
     }
 
     private onScroll() {
-        const scrollY = window.scrollY;
+        // Some environments allow overscroll, so if so if overscroll happens and the scroll goes back down, the header will hide.
+        // We avoid this by setting the scroll that we calculate from to 0 if it is less than 0.
+        const scrollY = Math.max(window.scrollY, 0);
         const realScrollDelta = scrollY - this.previousScrollY;
         // find the scroll delta from the homeY
         // if start scroll is before home, subtact the difference between home and start scroll from the delta
