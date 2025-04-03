@@ -1,9 +1,0 @@
-{
-    "extends": "./tsconfig.build.json",
-    "exclude": ["**/*.test.ts", "node_modules", "src/test/**", ".history/**"],
-    "compilerOptions": {
-        "noEmit": false,
-        "module": "esnext",
-        "outDir": "lib/esm"
-    }
-}
